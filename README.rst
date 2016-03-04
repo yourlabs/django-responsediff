@@ -22,7 +22,21 @@ Response state assertion
 When my user tests, he browses the website and checks that everything is
 rendered fine. This app allows to do high-level checks of HTML rendering.
 
-See responsediff/response.py docstrings for example usage.
+See responsediff/response.py docstrings for example usage, or use the
+conveniance mixin::
+
+    from responsediff.test import ResponseDiffTestMixin
+
+    class MixinTest(ResponseDiffTestMixin, test.TestCase):
+        def test_admin(self):
+            self.assertResponseDiffEmpty(test.Client().get('/admin/'))
+
+The above will fail on the first time with ``FixtureCreated`` to indicate that
+it has written
+``responsediff/tests/response_fixtures/MixinTest.test_assertNoDiff/content``.
+This file is meant to be added to version control. So next time this will run,
+it will check that ``response.content`` is the same, in future version, or in
+other configurations (ie. py35, py27, pypy, etc ...).
 
 Requirements
 ============
