@@ -5,7 +5,11 @@ import unittest
 from django import test
 from django.utils import six
 
-from responsediff.exceptions import DiffFound, FixtureCreated
+from responsediff.exceptions import (
+    DiffFound,
+    FixtureCreated,
+    UnexpectedStatusCode,
+)
 from responsediff.response import Response
 
 
@@ -23,7 +27,10 @@ class TestResponseDiff(unittest.TestCase):
         result = test.Client().get('/admin/')
         expected = Response.for_test(self)
 
-        if os.path.exists(expected.path):
+        if os.path.exists(expected.path):  # pragma: no cover
+            # Only makes sense when you're running the tests over and over
+            # locally, makes no sense on single-usage containers like travis,
+            # hence "no cover" above.
             shutil.rmtree(expected.path)
 
         with self.assertRaises(FixtureCreated):
@@ -41,7 +48,7 @@ class TestResponseDiff(unittest.TestCase):
         with self.assertRaises(DiffFound) as e:
             expected.assertNoDiff(result)
 
-        expected = '''
+        expected_diff = '''
 @@ -1 +1 @@
 -bla
 \ No newline at end of file
@@ -50,5 +57,16 @@ class TestResponseDiff(unittest.TestCase):
 '''.lstrip()
 
         diff = e.exception.message if six.PY2 else e.exception.args[0]
-        result = '\n'.join(diff.split('\n')[1:])
-        assert result == expected
+        result_diff = '\n'.join(diff.split('\n')[1:])
+        assert result_diff == expected_diff
+
+        # Let's fix it and test status code now
+        with open(expected.content_path, 'wb') as f:
+            f.write(result.content)
+
+        # Let's mess with the status code now
+        with open(expected.path + '/status_code', 'w') as f:
+            f.write('418')  # RFC 2324 LOL
+
+        with self.assertRaises(UnexpectedStatusCode) as e:
+            expected.assertNoDiff(result)
