@@ -1,0 +1,3 @@
+0.2.0 Test response.status_code, added ResponseDiffTestMixin.
+
+0.1.0 Autocreation of fixtures to test response.content
