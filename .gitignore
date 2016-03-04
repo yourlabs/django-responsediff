@@ -5,3 +5,4 @@ __pycache__
 .coverage
 .cache
 dbdiff/tests/db.sqlite3
+responsediff/tests/response_fixtures/TestResponseDiff.test_story/
