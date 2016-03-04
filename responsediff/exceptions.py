@@ -13,6 +13,16 @@ class DiffFound(ResponseDiffException):
         super(DiffFound, self).__init__('%s\n%s' % (cmd, out.decode('utf8')))
 
 
+class UnexpectedStatusCode(ResponseDiffException):
+    """Raised when the status_code has changed."""
+
+    def __init__(self, expected, result):
+        """Exception for when the result's status_code is different."""
+        super(UnexpectedStatusCode, self).__init__(
+            'Expected status code %s, got %s' % (expected, result)
+        )
+
+
 class FixtureCreated(ResponseDiffException):
     """
     Raised when a fixture was created.

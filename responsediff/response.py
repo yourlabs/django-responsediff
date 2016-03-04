@@ -5,9 +5,12 @@ import os
 import subprocess
 import tempfile
 
+from django.utils import six
+
 from .exceptions import (
     DiffFound,
     FixtureCreated,
+    UnexpectedStatusCode,
 )
 
 
@@ -68,9 +71,19 @@ class Response(object):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
+        created = False
+
         if not os.path.exists(self.content_path):
             with open(self.content_path, 'wb+') as f:
                 f.write(response.content)
+            created = True
+
+        if not os.path.exists(self.status_code_path):
+            with open(self.status_code_path, 'w+') as f:
+                f.write(six.text_type(response.status_code))
+            created = True
+
+        if created:
             raise FixtureCreated()
 
         fh, dump_path = tempfile.mkstemp('_responsediff')
@@ -81,6 +94,17 @@ class Response(object):
 
         if out:
             raise DiffFound(cmd, out)
+
+        with open(self.status_code_path, 'r') as f:
+            expected = int(f.read())
+
+        if expected != response.status_code:
+            raise UnexpectedStatusCode(expected, response.status_code)
+
+    @property
+    def status_code_path(self):
+        """Return the path to the file for the response.status_code."""
+        return os.path.join(self.path, 'status_code')
 
     @property
     def content_path(self):
