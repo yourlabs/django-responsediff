@@ -27,7 +27,10 @@ class TestResponseDiff(unittest.TestCase):
         result = test.Client().get('/admin/')
         expected = Response.for_test(self)
 
-        if os.path.exists(expected.path):
+        if os.path.exists(expected.path):  # pragma: no cover
+            # Only makes sense when you're running the tests over and over
+            # locally, makes no sense on single-usage containers like travis,
+            # hence "no cover" above.
             shutil.rmtree(expected.path)
 
         with self.assertRaises(FixtureCreated):
