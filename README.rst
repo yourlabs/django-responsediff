@@ -50,3 +50,9 @@ Install
 =======
 
 Install ``django-responsediff`` with pip.
+
+Related app
+===========
+
+A somewhat similar app which inspired django-responsediff is `django-test-utils
+<https://github.com/ericholscher/django-test-utils>`_.
