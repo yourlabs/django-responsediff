@@ -33,8 +33,16 @@ class TestResponseDiff(unittest.TestCase):
             # hence "no cover" above.
             shutil.rmtree(expected.path)
 
-        with self.assertRaises(FixtureCreated):
+        with self.assertRaises(FixtureCreated) as raises_result:
             expected.assertNoDiff(result)
+
+        msg = (
+            raises_result.exception.message
+            if six.PY2 else raises_result.exception.args[0]
+        )
+
+        assert expected.content_path in msg
+        assert expected.status_code_path in msg
 
         # should have been created
         assert os.path.exists(expected.content_path)

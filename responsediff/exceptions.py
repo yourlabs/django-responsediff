@@ -35,3 +35,7 @@ class FixtureCreated(ResponseDiffException):
     However, this should only happen once per fixture - unless the user in
     question forgets to commit the generated fixture !
     """
+    def __init__(self, fixture):
+        super(FixtureCreated, self).__init__(
+            'Created fixture in %s' % ', '.join(fixture),
+        )
