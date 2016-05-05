@@ -1,3 +1,5 @@
+0.4.0 Added created paths in FixtureCreated exception
+
 0.3.0 Test response.status_code, added ResponseDiffTestMixin
 
 0.2.0 Broken release (actually, it's just plain 0.1.0!)

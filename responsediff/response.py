@@ -71,20 +71,20 @@ class Response(object):
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
-        created = False
+        created = []
 
         if not os.path.exists(self.content_path):
             with open(self.content_path, 'wb+') as f:
                 f.write(response.content)
-            created = True
+            created.append(self.content_path)
 
         if not os.path.exists(self.status_code_path):
             with open(self.status_code_path, 'w+') as f:
                 f.write(six.text_type(response.status_code))
-            created = True
+            created.append(self.status_code_path)
 
         if created:
-            raise FixtureCreated()
+            raise FixtureCreated(created)
 
         fh, dump_path = tempfile.mkstemp('_responsediff')
         with os.fdopen(fh, 'wb') as f:
