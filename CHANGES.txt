@@ -1,3 +1,6 @@
+0.5.0 Added crawl feature
+      Changed fixture format, please regenerate to upgrade.
+
 0.4.0 Added created paths in FixtureCreated exception
 
 0.3.0 Test response.status_code, added ResponseDiffTestMixin
