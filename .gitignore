@@ -6,3 +6,4 @@ __pycache__
 .cache
 dbdiff/tests/db.sqlite3
 responsediff/tests/response_fixtures/TestResponseDiff.test_story/
+responsediff/tests/response_fixtures/MixinTest.test_websiteTest/

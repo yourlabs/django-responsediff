@@ -1,15 +1,11 @@
+import json
 import os
-import shutil
 import unittest
 
 from django import test
 from django.utils import six
 
-from responsediff.exceptions import (
-    DiffFound,
-    FixtureCreated,
-    UnexpectedStatusCode,
-)
+from responsediff.exceptions import DiffsFound
 from responsediff.response import Response
 
 
@@ -27,13 +23,16 @@ class TestResponseDiff(unittest.TestCase):
         result = test.Client().get('/admin/')
         expected = Response.for_test(self)
 
-        if os.path.exists(expected.path):  # pragma: no cover
+        if os.path.exists(expected.content_path):  # pragma: no cover
             # Only makes sense when you're running the tests over and over
             # locally, makes no sense on single-usage containers like travis,
             # hence "no cover" above.
-            shutil.rmtree(expected.path)
+            os.unlink(expected.content_path)
 
-        with self.assertRaises(FixtureCreated) as raises_result:
+        if os.path.exists(expected.metadata_path):  # pragma: no cover
+            os.unlink(expected.metadata_path)
+
+        with self.assertRaises(DiffsFound) as raises_result:
             expected.assertNoDiff(result)
 
         msg = (
@@ -42,7 +41,7 @@ class TestResponseDiff(unittest.TestCase):
         )
 
         assert expected.content_path in msg
-        assert expected.status_code_path in msg
+        assert expected.metadata_path in msg
 
         # should have been created
         assert os.path.exists(expected.content_path)
@@ -53,7 +52,7 @@ class TestResponseDiff(unittest.TestCase):
         with open(expected.content_path, 'w') as f:
             f.write('bla')
 
-        with self.assertRaises(DiffFound) as e:
+        with self.assertRaises(DiffsFound) as e:
             expected.assertNoDiff(result)
 
         expected_diff = '''
@@ -65,7 +64,7 @@ class TestResponseDiff(unittest.TestCase):
 '''.lstrip()
 
         diff = e.exception.message if six.PY2 else e.exception.args[0]
-        result_diff = '\n'.join(diff.split('\n')[1:])
+        result_diff = '\n'.join(diff.split('\n')[2:])
         assert result_diff == expected_diff
 
         # Let's fix it and test status code now
@@ -73,8 +72,14 @@ class TestResponseDiff(unittest.TestCase):
             f.write(result.content)
 
         # Let's mess with the status code now
-        with open(expected.path + '/status_code', 'w') as f:
-            f.write('418')  # RFC 2324 LOL
+        with open(expected.metadata_path, 'w') as f:
+            json.dump(
+                {
+                    'status_code': 418,  # RFC 2324 LOL
+                },
+                f,
+                indent=4
+            )
 
-        with self.assertRaises(UnexpectedStatusCode) as e:
+        with self.assertRaises(DiffsFound) as e:
             expected.assertNoDiff(result)

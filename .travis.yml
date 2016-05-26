@@ -16,6 +16,7 @@ env:
   - TOXENV=pypy-django18
   - TOXENV=pypy-django19
   - TOXENV=pypy-django110
+  - TOXENV=checkqa
 install:
 - pip install -U pip
 - pip install tox codecov

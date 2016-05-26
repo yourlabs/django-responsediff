@@ -1,17 +1,12 @@
 """Response object manages fixtures and does diff."""
 
 import inspect
+import json
 import os
 import subprocess
 import tempfile
 
-from django.utils import six
-
-from .exceptions import (
-    DiffFound,
-    FixtureCreated,
-    UnexpectedStatusCode,
-)
+from .exceptions import DiffsFound
 
 
 def diff(first, second):
@@ -43,14 +38,18 @@ class Response(object):
     This would create a directory in the directory containing TestYourView,
     named ``responsediff_fixtures``, with a sub-directory
     ``TestYourView.test_your_page`` and a file ``content`` with
-    response.content in there, if it does not already exist, and raise
-    ``FixtureCreated`` to inform the user that no test has actually been run,
-    and that the fixture has just been created.
+    response.content in there, and another called ``metadata`` with additional
+    information about the response in there such as the status code. The test
+    would fail with a DiffsFound error containing the list of created files to
+    inform the user that no test has actually been run, and that the fixture
+    has just been created.
 
     User should add the generated fixture to the repository. Then, next time
-    this test is run, it will run GNU diff between ``response.content`` and the
-    previously-generated fixture, if a diff is found then assertNoDiff() will
-    raise a DiffFound exception, printing out the diff file.
+    this test is run, it will run GNU diff between ``response.content`` and its
+    metadata and the previously-generated fixture, if a diff is found then
+    assertNoDiff() will raise a DiffsFound exception, printing out the diffs
+    and commands used for the diffs, leaving temporary files behind for further
+    investigation.
     """
 
     def __init__(self, path):
@@ -62,58 +61,75 @@ class Response(object):
         self.path = path
 
     def assertNoDiff(self, response):  # noqa
+        """Backward compatibility method for pre-assertWebsiteSame versions."""
+        diffs, created = self.make_diff(response)
+
+        if created or diffs:
+            raise DiffsFound(diffs, created)
+
+    def make_diff(self, response, metadata=None):
         """
         Compare a response object with the fixture.
 
-        If the fixture doesn't exist, create it and raise FixtureCreated(),
-        otherwise run GNU-diff and raise DiffFound if it finds any diff.
-        """
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
+        If the fixture doesn't exist, create it, otherwise run GNU-diff and
+        return a list of diff outputs with their commands.
 
-        created = []
+        Return created file list and dict of diffs.
+        """
+        if not os.path.exists(os.path.dirname(self.content_path)):
+            os.makedirs(os.path.dirname(self.content_path))
+
+        diffs = {}
+        created = {}
+
+        metadata = metadata or {}
+        metadata['status_code'] = response.status_code
 
         if not os.path.exists(self.content_path):
             with open(self.content_path, 'wb+') as f:
                 f.write(response.content)
-            created.append(self.content_path)
+            created[self.content_path] = response.content
 
-        if not os.path.exists(self.status_code_path):
-            with open(self.status_code_path, 'w+') as f:
-                f.write(six.text_type(response.status_code))
-            created.append(self.status_code_path)
-
-        if created:
-            raise FixtureCreated(created)
+        if not os.path.exists(self.metadata_path):
+            with open(self.metadata_path, 'w+') as f:
+                json.dump(metadata, f, indent=4, sort_keys=True)
+            created[self.metadata_path] = json.dumps(metadata, indent=4)
 
         fh, dump_path = tempfile.mkstemp('_responsediff')
-        with os.fdopen(fh, 'wb') as f:
+        with os.fdopen(fh, 'wb+') as f:
             f.write(response.content)
 
         cmd, out = diff(self.content_path, dump_path)
-
         if out:
-            raise DiffFound(cmd, out)
+            diffs[cmd] = out
 
-        with open(self.status_code_path, 'r') as f:
-            expected = int(f.read())
+        metadata_fh, metadata_dump_path = tempfile.mkstemp('_responsediff')
+        with os.fdopen(metadata_fh, 'w') as f:
+            json.dump(metadata, f, indent=4, sort_keys=True)
 
-        if expected != response.status_code:
-            raise UnexpectedStatusCode(expected, response.status_code)
+        cmd, out = diff(self.metadata_path, metadata_dump_path)
+        if out:
+            diffs[cmd] = out
+
+        return diffs, created
 
     @property
-    def status_code_path(self):
-        """Return the path to the file for the response.status_code."""
-        return os.path.join(self.path, 'status_code')
+    def metadata_path(self):
+        """Return the path to the file for the response.metadata."""
+        if self.path.endswith('/'):
+            return os.path.join(self.path, 'metadata')
+        return self.path + '.metadata'
 
     @property
     def content_path(self):
         """Return the path to the file for the response.content contents."""
-        return os.path.join(self.path, 'content')
+        if self.path.endswith('/'):
+            return os.path.join(self.path, 'content')
+        return self.path + '.content'
 
     @classmethod
-    def for_test(cls, case, *args, **kwargs):
-        """Instanciate a Response with a path for the case in question."""
+    def for_test(cls, case, url=None, *args, **kwargs):
+        """Instanciate a Response with a path for the case and url if any."""
         name = '.'.join(case.id().split('.')[-2:])
 
         path = os.path.join(
@@ -121,5 +137,14 @@ class Response(object):
             'response_fixtures',
             name
         )
+
+        if url:
+            path = os.path.join(
+                path,
+                *[p for p in url.split('/') if p]
+            )
+
+            if url.endswith('/'):
+                path += '/'
 
         return cls(path, *args, **kwargs)
