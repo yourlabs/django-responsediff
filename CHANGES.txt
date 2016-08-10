@@ -1,3 +1,7 @@
+0.7.0 Selector to filter content to diff by @njoyard
+
+0.6.0 New features were missing from 0.5.0
+
 0.5.0 Added crawl feature
       Changed fixture format, please regenerate to upgrade.
 
