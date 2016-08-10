@@ -22,7 +22,11 @@ setup(
     long_description=read('README.rst'),
     license='MIT',
     keywords='django test response fixture diff',
-    install_requires=['six'],
+    install_requires=[
+        'beautifulsoup4',
+        'html5lib',
+        'six'
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
