@@ -6,6 +6,9 @@ import os
 import subprocess
 import tempfile
 
+from bs4 import BeautifulSoup
+import six
+
 from .exceptions import DiffsFound
 
 
@@ -60,14 +63,14 @@ class Response(object):
         """
         self.path = path
 
-    def assertNoDiff(self, response):  # noqa
+    def assertNoDiff(self, response, selector=None):  # noqa
         """Backward compatibility method for pre-assertWebsiteSame versions."""
-        diffs, created = self.make_diff(response)
+        diffs, created = self.make_diff(response, selector=selector)
 
         if created or diffs:
             raise DiffsFound(diffs, created)
 
-    def make_diff(self, response, metadata=None):
+    def make_diff(self, response, metadata=None, selector=None):
         """
         Compare a response object with the fixture.
 
@@ -85,10 +88,20 @@ class Response(object):
         metadata = metadata or {}
         metadata['status_code'] = response.status_code
 
+        if selector:
+            soup = BeautifulSoup(response.content, 'html5lib')
+            elements = soup.select(selector)
+            content = '\n---\n'.join(
+                map(lambda e: six.text_type(e), elements))
+            mode = 'w+'
+        else:
+            content = response.content
+            mode = 'wb+'
+
         if not os.path.exists(self.content_path):
-            with open(self.content_path, 'wb+') as f:
-                f.write(response.content)
-            created[self.content_path] = response.content
+            with open(self.content_path, mode) as f:
+                f.write(content)
+            created[self.content_path] = content
 
         if not os.path.exists(self.metadata_path):
             with open(self.metadata_path, 'w+') as f:
@@ -96,8 +109,8 @@ class Response(object):
             created[self.metadata_path] = json.dumps(metadata, indent=4)
 
         fh, dump_path = tempfile.mkstemp('_responsediff')
-        with os.fdopen(fh, 'wb+') as f:
-            f.write(response.content)
+        with os.fdopen(fh, mode) as f:
+            f.write(content)
 
         cmd, out = diff(self.content_path, dump_path)
         if out:

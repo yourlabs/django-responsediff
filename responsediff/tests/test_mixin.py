@@ -31,6 +31,9 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
     def test_assertNoDiff(self):  # noqa
         self.assertResponseDiffEmpty(test.Client().get('/admin/'))
 
+    def test_assertNoDiffSelector(self):  # noqa
+        self.assertResponseDiffEmpty(test.Client().get('/admin/'), 'h1, p')
+
     def test_assertWebsiteSame(self):  # noqa
         subject = Response.for_test(self, url='/')
 

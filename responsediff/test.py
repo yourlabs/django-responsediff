@@ -12,9 +12,14 @@ from .response import Response
 class ResponseDiffTestMixin(object):
     """Adds assertResponseDiffEmpty() method."""
 
-    def assertResponseDiffEmpty(self, result):  # noqa
-        """Test that result matches fixtures."""
-        Response.for_test(self).assertNoDiff(result)
+    def assertResponseDiffEmpty(self, result, selector=None):  # noqa
+        """
+        Test that result matches fixtures.
+
+        When a selector is specified, the result will be parsed as HTML and
+        only elements matching this selector will be tested.
+        """
+        Response.for_test(self).assertNoDiff(result, selector)
 
     def assertWebsiteSame(self, url=None, client=None):  # noqa
         covered, diffs, created = self.responsediff_website_crawl(url, client)
