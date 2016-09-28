@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 import shutil
@@ -33,6 +34,15 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
 
     def test_assertNoDiffSelector(self):  # noqa
         self.assertResponseDiffEmpty(test.Client().get('/admin/'), 'h1, p')
+
+    def test_assertNoDiffSelector_non_ascii(self):  # noqa
+        response = test.Client().get('/admin/')
+
+        response.content = '<h1>à</h1>' if six.PY3 else u'<h1>à</h1>'
+
+        # Should fail, but not with a decoding error
+        with self.assertRaises(DiffsFound):
+            self.assertResponseDiffEmpty(response, 'h1')
 
     def test_assertWebsiteSame(self):  # noqa
         subject = Response.for_test(self, url='/')

@@ -7,7 +7,6 @@ import subprocess
 import tempfile
 
 from bs4 import BeautifulSoup
-import six
 
 from .exceptions import DiffsFound
 
@@ -91,8 +90,7 @@ class Response(object):
         if selector:
             soup = BeautifulSoup(response.content, 'html5lib')
             elements = soup.select(selector)
-            content = '\n---\n'.join(
-                map(lambda e: six.text_type(e), elements))
+            content = '\n---\n'.join(map(str, elements))
             mode = 'w+'
         else:
             content = response.content
