@@ -1,22 +1,13 @@
 sudo: false
 language: python
 python:
-- '3.5'
+- '3.6'
 env:
   matrix:
-  - TOXENV=py27-django18
-  - TOXENV=py27-django19
-  - TOXENV=py27-django110
-  - TOXENV=py34-django18
-  - TOXENV=py34-django19
-  - TOXENV=py34-django110
-  - TOXENV=py35-django18
-  - TOXENV=py35-django19
-  - TOXENV=py35-django110
-  - TOXENV=pypy-django18
-  - TOXENV=pypy-django19
-  - TOXENV=pypy-django110
-  - TOXENV=checkqa
+  - TOXENV=py27-dj111
+  - TOXENV=py36-dj111
+  - TOXENV=py36-dj20
+  - TOXENV=qa
 install:
 - pip install -U pip
 - pip install tox codecov

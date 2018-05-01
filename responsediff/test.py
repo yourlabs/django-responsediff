@@ -21,8 +21,9 @@ class ResponseDiffTestMixin(object):
         """
         Response.for_test(self).assertNoDiff(result, selector)
 
-    def assertWebsiteSame(self, url=None, client=None):  # noqa
-        covered, diffs, created = self.responsediff_website_crawl(url, client)
+    def assertWebsiteSame(self, url=None, client=None, selector=None):  # noqa
+        covered, diffs, created = self.responsediff_website_crawl(
+            url, client, selector=selector)
 
         if created or diffs:
             raise DiffsFound(diffs, created)
@@ -30,7 +31,7 @@ class ResponseDiffTestMixin(object):
         return covered
 
     def responsediff_website_crawl(self, url=None, client=None, covered=None,
-                                   diffs=None, created=None):
+                                   diffs=None, created=None, selector=None):
         """
         Test your website with one call to this method.
 
@@ -47,18 +48,24 @@ class ResponseDiffTestMixin(object):
         conn = connections['default']
         with CaptureQueriesContext(conn) as queries:
             response = client.get(url)
+        self.process_response(response)
         metadata = {'query_count': len(queries)}
 
         _diffs, _created = Response.for_test(self, url).make_diff(
             response,
-            metadata=metadata
+            metadata=metadata,
+            # Don't apply selector on first url, so we do the layout once
+            selector=selector if covered else None,
         )
         covered.append(url)
         created.update(_created)
         diffs.update(_diffs)
 
+        if hasattr(response, 'streaming_content'):
+            return covered, diffs, created
+
         results = re.findall(
-            '"((http://testserver)?/[^"]*)',
+            'href="((http://testserver)?/[^"]*)',
             response.content.decode('utf8')
         )
 
@@ -72,12 +79,40 @@ class ResponseDiffTestMixin(object):
             if sub_url in covered:
                 continue
 
+            if self.skip_url(sub_url):
+                continue
+
             self.responsediff_website_crawl(
                 sub_url,
                 client=client,
                 covered=covered,
                 diffs=diffs,
-                created=created
+                created=created,
+                selector=selector,
             )
 
         return covered, diffs, created
+
+    def get_content_replace_patterns(self, response):
+        """Return a list of pattern:replacement for response contents."""
+        return [
+            ('\n.*csrfmiddlewaretoken.*\n', ''),
+            ('\n.*webpack.bundle.*\n', ''),
+        ]
+
+    def process_response(self, response):
+        """Taint the response before saving."""
+        if hasattr(response, 'streaming_content'):
+            return
+
+        for replace in self.get_content_replace_patterns(response):
+            response.content = re.sub(
+                replace[0],
+                replace[1],
+                response.content.decode('utf8')
+            ).encode('utf8')
+
+    def skip_url(self, url):
+        """Return true if the url should be skipped, skips STATIC_URL."""
+        from django.conf import settings
+        return url.startswith(settings.STATIC_URL)

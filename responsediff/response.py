@@ -87,13 +87,18 @@ class Response(object):
         metadata = metadata or {}
         metadata['status_code'] = response.status_code
 
-        if selector:
+        if selector and not hasattr(response, 'streaming_content'):
             soup = BeautifulSoup(response.content, 'html5lib')
             elements = soup.select(selector)
             content = '\n---\n'.join(map(str, elements))
             mode = 'w+'
         else:
-            content = response.content
+            try:
+                content = response.content
+            except AttributeError:
+                content = b'\n'.join(
+                    [i for i in response.streaming_content]
+                )
             mode = 'wb+'
 
         if not os.path.exists(self.content_path):
