@@ -21,7 +21,9 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
 
         client.get.side_effect = [
             http.HttpResponse(
-                content='"%s"' % '"\n"'.join(fixtures),
+                content='\n'.join([
+                    'href="{}"'.format(i) for i in fixtures
+                ]),
             ),
         ] + [
             http.HttpResponse(content=url) for url in fixtures
@@ -124,10 +126,10 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
 @@ -1 +1,4 @@
 -fail please
 \ No newline at end of file
-+"/notrailing"
-+"/notrailing?foo=bar"
-+"/trailing/"
-+"/trailing/?foo=bar"
++href="/notrailing"
++href="/notrailing?foo=bar"
++href="/trailing/"
++href="/trailing/?foo=bar"
 \ No newline at end of file
         ''')
 
@@ -142,7 +144,7 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
             shutil.rmtree(os.path.dirname(subject.content_path))
 
         client = mock.Mock()
-        client.get.return_value = http.HttpResponse(content='"/a" "/b"')
+        client.get.return_value = http.HttpResponse(content='href="/a" href="/b"')
 
         result = self.responsediff_website_crawl(client=client)
         assert result[0] == ['/', '/a', '/b']

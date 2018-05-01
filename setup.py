@@ -12,7 +12,7 @@ def read(fname):
 
 setup(
     name='django-responsediff',
-    version='0.7.1',
+    version='0.7.2',
     description='HTTP response diffing against fixtures for testing',
     author='James Pic',
     author_email='jamespic@gmail.com',
