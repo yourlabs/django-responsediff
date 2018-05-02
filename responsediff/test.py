@@ -41,9 +41,9 @@ class ResponseDiffTestMixin(object):
         """
         url = url or '/'
         client = client or test.Client()
-        covered = covered or []
-        diffs = diffs or {}
-        created = created or {}
+        covered = covered if covered is not None else []
+        diffs = diffs if diffs is not None else {}
+        created = created if created is not None else {}
 
         conn = connections['default']
         with CaptureQueriesContext(conn) as queries:
