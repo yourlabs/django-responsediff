@@ -95,12 +95,12 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
             'MixinTest.test_websiteTest/metadata',
             'MixinTest.test_websiteTest/trailing/metadata',
             'MixinTest.test_websiteTest/trailing/content',
-            'MixinTest.test_websiteTest/trailing/?foo=bar.metadata',
-            'MixinTest.test_websiteTest/trailing/?foo=bar.content',
+            'MixinTest.test_websiteTest/trailing/foo=bar.metadata',
+            'MixinTest.test_websiteTest/trailing/foo=bar.content',
             'MixinTest.test_websiteTest/notrailing.content',
             'MixinTest.test_websiteTest/notrailing.metadata',
-            'MixinTest.test_websiteTest/notrailing?foo=bar.metadata',
-            'MixinTest.test_websiteTest/notrailing?foo=bar.content',
+            'MixinTest.test_websiteTest/notrailingfoo=bar.metadata',
+            'MixinTest.test_websiteTest/notrailingfoo=bar.content',
         ]
         result_created = [
             re.sub(

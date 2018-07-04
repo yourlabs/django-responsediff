@@ -11,6 +11,18 @@ from bs4 import BeautifulSoup
 from .exceptions import DiffsFound
 
 
+# https://docs.microsoft.com/fr-fr/windows/desktop/FileIO/naming-a-file#naming-conventions
+CROSSPLATFORM_COMPATIBLE_NOT = (
+    '<', '>', ':', '"', '\\', '|', '?', '*')
+
+
+def crossplatform_compatible(value):
+    """Strip out caracters incompatible between platforms."""
+    for i in CROSSPLATFORM_COMPATIBLE_NOT:
+        value = value.replace(i, '')
+    return value
+
+
 def diff(first, second):
     """Return the command and diff output between first and second paths."""
     cmd = 'diff -u1 %s %s | sed "1,2 d"' % (first, second)
@@ -129,19 +141,23 @@ class Response(object):
 
         return diffs, created
 
+    def filesystem_path(self, suffix):
+        """Return the filesystem path for fixture."""
+        if self.path.endswith('/'):
+            path = os.path.join(self.path, suffix)
+        else:
+            path = self.path + '.' + suffix
+        return crossplatform_compatible(path)
+
     @property
     def metadata_path(self):
         """Return the path to the file for the response.metadata."""
-        if self.path.endswith('/'):
-            return os.path.join(self.path, 'metadata')
-        return self.path + '.metadata'
+        return self.filesystem_path('metadata')
 
     @property
     def content_path(self):
         """Return the path to the file for the response.content contents."""
-        if self.path.endswith('/'):
-            return os.path.join(self.path, 'content')
-        return self.path + '.content'
+        return self.filesystem_path('content')
 
     @classmethod
     def for_test(cls, case, url=None, *args, **kwargs):
