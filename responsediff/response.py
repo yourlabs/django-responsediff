@@ -99,7 +99,10 @@ class Response(object):
         metadata = metadata or {}
         metadata['status_code'] = response.status_code
 
-        if selector and not hasattr(response, 'streaming_content'):
+        is_html = response['Content-Type'].startswith('text/html')
+        is_streaming = hasattr(response, 'streaming_content')
+
+        if selector and is_html and not is_streaming:
             soup = BeautifulSoup(response.content, 'html5lib')
             elements = soup.select(selector)
             content = '\n---\n'.join(map(str, elements))
