@@ -9,6 +9,17 @@ from .exceptions import DiffsFound
 from .response import Response
 
 
+def strip_parameters(names, url):
+    """Remove GET parameters from url."""
+    for name in names:
+        url = re.sub(name + '=[^&]*&?', '', url)
+
+    if url.endswith('?'):
+        url = url[:-1]
+
+    return url
+
+
 class ResponseDiffTestMixin(object):
     """Adds assertResponseDiffEmpty() method."""
 
@@ -77,6 +88,8 @@ class ResponseDiffTestMixin(object):
                 result[0]
             )
 
+            sub_url = self.transform_url(sub_url)
+
             if sub_url in covered:
                 continue
 
@@ -117,3 +130,10 @@ class ResponseDiffTestMixin(object):
         """Return true if the url should be skipped, skips STATIC_URL."""
         from django.conf import settings
         return url.startswith(settings.STATIC_URL)
+
+    def transform_url(self, url):
+        """Return the URL to use in the registry, use this to remove params."""
+        return strip_parameters(
+            getattr(self, 'strip_parameters', []),
+            url,
+        )

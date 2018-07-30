@@ -5,8 +5,20 @@ import unittest
 from django import test
 from django.utils import six
 
+import pytest
+
 from responsediff.exceptions import DiffsFound
 from responsediff.response import Response
+from responsediff.test import strip_parameters
+
+
+@pytest.mark.parametrize('fixture,expected', [
+    ('aoeu/?_a=aoeu', 'aoeu/'),
+    ('aoeu?_a=aoeu', 'aoeu'),
+    ('aoeu?_a=aoeu&b=2', 'aoeu?b=2'),
+])
+def test_strip_parameters(fixture, expected):  # noqa: D103
+    assert strip_parameters(['_a'], fixture) == expected
 
 
 class TestResponseDiff(unittest.TestCase):
