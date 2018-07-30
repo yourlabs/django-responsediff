@@ -41,7 +41,8 @@ class ResponseDiffTestMixin(object):
         """
         url = url or '/'
         client = client or test.Client()
-        covered = covered if covered is not None else []
+        if not covered:
+            covered = getattr(self, 'covered', [])
         diffs = diffs if diffs is not None else {}
         created = created if created is not None else {}
 
