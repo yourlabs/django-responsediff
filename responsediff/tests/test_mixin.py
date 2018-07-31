@@ -148,3 +148,17 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
 
         result = self.responsediff_website_crawl(client=client)
         assert result[0] == ['/', '/a', '/b']
+
+    def test_redirect(self):
+        subject = Response.for_test(self, url='/')
+
+        # Ensure we're clean
+        if os.path.exists(os.path.dirname(subject.content_path)):
+            # pragma: no cover
+            shutil.rmtree(os.path.dirname(subject.content_path))
+
+        client = mock.Mock()
+        client.get.return_value = http.HttpResponseRedirect('/bar')
+
+        result = self.responsediff_website_crawl(client=client)
+        assert result[0] == ['/', '/bar']

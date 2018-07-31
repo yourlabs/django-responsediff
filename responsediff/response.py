@@ -81,7 +81,7 @@ class Response(object):
         if created or diffs:
             raise DiffsFound(diffs, created)
 
-    def make_diff(self, response, metadata=None, selector=None):
+    def make_diff(self, response, metadata=None, selector=None):  # noqa: C901
         """
         Compare a response object with the fixture.
 
@@ -98,6 +98,8 @@ class Response(object):
 
         metadata = metadata or {}
         metadata['status_code'] = response.status_code
+        if 'Location' in response:
+            metadata['Location'] = response['Location']
 
         is_html = response['Content-Type'].startswith('text/html')
         is_streaming = hasattr(response, 'streaming_content')

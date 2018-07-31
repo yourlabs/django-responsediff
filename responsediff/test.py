@@ -80,6 +80,8 @@ class ResponseDiffTestMixin(object):
             'href="((http://testserver)?/[^"]*)',
             response.content.decode('utf8')
         )
+        if 'Location' in response:
+            results.append((response['Location'], ''))
 
         for result in results:
             sub_url = re.sub(
