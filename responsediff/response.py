@@ -25,7 +25,7 @@ def crossplatform_compatible(value):
 
 def diff(first, second):
     """Return the command and diff output between first and second paths."""
-    cmd = 'diff -u1 %s %s | sed "1,2 d"' % (first, second)
+    cmd = 'diff -U 1 %s %s | sed "1,2 d"' % (first, second)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     out, err = proc.communicate()
     return cmd, out
