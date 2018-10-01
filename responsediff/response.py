@@ -133,6 +133,7 @@ class Response(object):
             f.write(content)
 
         cmd, out = diff(self.content_path, dump_path)
+        os.unlink(dump_path)
         if out:
             diffs[cmd] = out
 
@@ -141,6 +142,7 @@ class Response(object):
             json.dump(metadata, f, indent=4, sort_keys=True)
 
         cmd, out = diff(self.metadata_path, metadata_dump_path)
+        os.unlink(metadata_dump_path)
         if out:
             diffs[cmd] = out
 
