@@ -11,9 +11,12 @@ from bs4 import BeautifulSoup
 from .exceptions import DiffsFound
 
 
-# https://docs.microsoft.com/fr-fr/windows/desktop/FileIO/naming-a-file#naming-conventions
 CROSSPLATFORM_COMPATIBLE_NOT = (
-    '<', '>', ':', '"', '\\', '|', '?', '*')
+    # https://docs.microsoft.com/fr-fr/windows/desktop/FileIO/naming-a-file#naming-conventions
+    '<', '>', ':', '"', '\\', '|', '?', '*'
+    # those break when injected
+    '&', ';',
+)
 
 
 def crossplatform_compatible(value):
