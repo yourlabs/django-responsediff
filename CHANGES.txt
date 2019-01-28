@@ -1,3 +1,5 @@
+0.7.11 Support FIXTURE_REWRITE env var
+
 0.7.6 Support redirects
 
 0.7.5 Options to remove duplicate fixtures

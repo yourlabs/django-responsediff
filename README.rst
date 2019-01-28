@@ -39,6 +39,11 @@ it will check that ``response.status_code`` and ``response.content`` is the
 same, in future version, or in other configurations (ie. py35, py27, pypy, etc
 ...).
 
+Instead of deleting the fixtures manually before running the tests to
+regenerate them, just run your tests with FIXTURE_REWRITE=1 environment
+variable. This will overwrite the fixtures and make the tests look like it
+passed.
+
 Requirements
 ============
 

@@ -18,6 +18,8 @@ CROSSPLATFORM_COMPATIBLE_NOT = (
     '&', ';',
 )
 
+REWRITE = os.getenv('FIXTURE_REWRITE')
+
 
 def crossplatform_compatible(value):
     """Strip out caracters incompatible between platforms."""
@@ -121,15 +123,17 @@ class Response(object):
                 )
             mode = 'wb+'
 
-        if not os.path.exists(self.content_path):
+        if not os.path.exists(self.content_path) or REWRITE:
             with open(self.content_path, mode) as f:
                 f.write(content)
-            created[self.content_path] = content
+            if not REWRITE:
+                created[self.content_path] = content
 
-        if not os.path.exists(self.metadata_path):
+        if not os.path.exists(self.metadata_path) or REWRITE:
             with open(self.metadata_path, 'w+') as f:
                 json.dump(metadata, f, indent=4, sort_keys=True)
-            created[self.metadata_path] = json.dumps(metadata, indent=4)
+            if not REWRITE:
+                created[self.metadata_path] = json.dumps(metadata, indent=4)
 
         fh, dump_path = tempfile.mkstemp('_responsediff')
         with os.fdopen(fh, mode) as f:
