@@ -71,7 +71,7 @@ class TestResponseDiff(unittest.TestCase):
 @@ -1 +1 @@
 -bla
 \ No newline at end of file
-+<h1>Not Found</h1><p>The requested resource was not found on this server.</p>
++<h1>Not Found</h1><p>The requested URL /adminfoo/ was not found on this server.</p>
 \ No newline at end of file
 '''.lstrip()
 
