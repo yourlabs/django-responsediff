@@ -16,6 +16,8 @@ itself and to make it reusable for other apps.
 
 It's pretty much the same as django-dbdiff, except this is for HTTP response.
 
+.. note:: v0.7 supports up to Django < 2.1
+
 Response state assertion
 ========================
 

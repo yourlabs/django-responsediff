@@ -3,6 +3,7 @@
 import inspect
 import json
 import os
+import re
 import subprocess
 import tempfile
 
@@ -79,8 +80,22 @@ class Response(object):
         """
         self.path = path
 
-    def assertNoDiff(self, response, selector=None):  # noqa
+    def assertNoDiff(self, response, selector=None, replace=None):  # noqa
         """Backward compatibility method for pre-assertWebsiteSame versions."""
+        if not replace:
+            replace = []
+
+        replace += [
+            ('<[^<]*csrfmiddlewaretoken[^>]*>', '{% csrf_token %}'),
+        ]
+
+        for pattern in replace:
+            response.content = re.sub(
+                pattern[0],
+                pattern[1],
+                response.content.decode('utf8')
+            ).encode('utf8')
+
         diffs, created = self.make_diff(response, selector=selector)
 
         if created or diffs:

@@ -32,7 +32,7 @@ class TestResponseDiff(unittest.TestCase):
         assert Response.for_test(self).path == expected
 
     def test_story(self):
-        result = test.Client().get('/admin/')
+        result = test.Client().get('/adminfoo/')
         expected = Response.for_test(self)
 
         if os.path.exists(expected.content_path):  # pragma: no cover
@@ -71,7 +71,7 @@ class TestResponseDiff(unittest.TestCase):
 @@ -1 +1 @@
 -bla
 \ No newline at end of file
-+<h1>Not Found</h1><p>The requested URL /admin/ was not found on this server.</p>
++<h1>Not Found</h1><p>The requested resource was not found on this server.</p>
 \ No newline at end of file
 '''.lstrip()
 

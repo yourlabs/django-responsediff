@@ -32,10 +32,13 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
         return client
 
     def test_assertNoDiff(self):  # noqa
-        self.assertResponseDiffEmpty(test.Client().get('/admin/'))
+        self.assertResponseDiffEmpty(test.Client().get('/admin/login/'))
 
     def test_assertNoDiffSelector(self):  # noqa
-        self.assertResponseDiffEmpty(test.Client().get('/admin/'), 'h1, p')
+        self.assertResponseDiffEmpty(
+            test.Client().get('/admin/login/'),
+            'h1, p'
+        )
 
     def test_assertNoDiffSelector_non_ascii(self):  # noqa
         response = test.Client().get('/admin/')

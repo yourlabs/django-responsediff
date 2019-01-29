@@ -1,12 +1,10 @@
 sudo: false
 language: python
 python:
-- '3.6'
+- '3.7'
 env:
   matrix:
-  - TOXENV=py27-dj111
-  - TOXENV=py36-dj111
-  - TOXENV=py36-dj20
+  - TOXENV=py37-dj21
   - TOXENV=qa
 install:
 - pip install -U pip
