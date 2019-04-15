@@ -16,6 +16,7 @@ from responsediff.test import strip_parameters
     ('aoeu/?_a=aoeu', 'aoeu/'),
     ('aoeu?_a=aoeu', 'aoeu'),
     ('aoeu?_a=aoeu&b=2', 'aoeu?b=2'),
+    ('aoeu#ab', 'aoeu'),
 ])
 def test_strip_parameters(fixture, expected):  # noqa: D103
     assert strip_parameters(['_a'], fixture) == expected

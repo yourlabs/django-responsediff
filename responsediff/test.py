@@ -11,6 +11,9 @@ from .response import Response
 
 def strip_parameters(names, url):
     """Remove GET parameters from url."""
+    if '#' in url:
+        url = url[:url.index('#')]
+
     for name in names:
         url = re.sub(name + '=[^&]*&?', '', url)
 
