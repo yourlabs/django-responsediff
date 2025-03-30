@@ -16,4 +16,4 @@ class DiffsFound(ResponseDiffException):
             '%s\n%s' % (cmd, out.decode('utf8'))
             for cmd, out in diffs.items()
         ]
-        super(DiffsFound, self).__init__('\n'.join(message))
+        super().__init__('\n'.join(message))
