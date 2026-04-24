@@ -46,7 +46,7 @@ jobs:
         run: |
           for dj in ${{ matrix.django-versions }}; do
             echo "::group::Django $dj"
-            pip install -q "Django~=${dj}.0"
+            major="${dj%%.*}" && pip install -q "Django>=${dj},<$((major+1)).0"
             pytest -vv --cov=responsediff responsediff/
             echo "::endgroup::"
           done

@@ -44,8 +44,7 @@ class MixinTest(ResponseDiffTestMixin, test.TestCase):
             if os.path.exists(path):
                 os.unlink(path)
 
-        response = test.Client().get('/admin/')
-        response.content = '<h1>à</h1>'
+        response = http.HttpResponse('<h1>à</h1>', content_type='text/html')
 
         # Should fail, but not with a decoding error
         with self.assertRaises(DiffsFound):
