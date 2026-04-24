@@ -35,12 +35,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: true
+          cache: 'pip'
 
       - name: Install base dependencies
         run: |
           pip install -U pip
-          pip install beautifulsoup4 html5lib pytest pytest-django pytest-cov
-          pip install -e .
+          pip install -e ".[test]"
 
       - name: Run tests for each Django version
         run: |

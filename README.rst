@@ -31,12 +31,12 @@ conveniance mixin::
         def test_admin(self):
             self.assertResponseDiffEmpty(test.Client().get('/admin/'))
 
-The above will fail on the first time with ``FixtureCreated`` to indicate that
+The above will fail on the first time with ``DiffsFound`` to indicate that
 it has written
-``responsediff/tests/response_fixtures/MixinTest.test_admin/{content,status_code}``.
-This file is meant to be added to version control. So next time this will run,
-it will check that ``response.status_code`` and ``response.content`` is the
-same, in future version, or in other configurations.
+``responsediff/tests/response_fixtures/MixinTest.test_admin/{content,metadata}``.
+These files are meant to be added to version control. So next time this will
+run, it will check that ``response.status_code`` and ``response.content`` are
+the same, in future versions, or in other configurations.
 
 Instead of deleting the fixtures manually before running the tests to
 regenerate them, just run your tests with ``FIXTURE_REWRITE=1`` environment
